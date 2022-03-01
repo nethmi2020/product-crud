@@ -1,15 +1,17 @@
 
 <?php
 
+$errors= [];
 $pdo =new PDO('mysql:host=localhost;dbname=product_crud', 'root', '');
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 // image=&title=&description=&price=
-// $title='';
-// $description='';
-// $price='';
+$title='';
+$description='';
+$price='';
 // $date= '';
 
+// var_dump($_FILES);
 
 
 if($_SERVER['REQUEST_METHOD']=== 'POST'){
@@ -19,21 +21,60 @@ $description=$_POST['description'];
 $price=$_POST['price'];
 $date= date('Y-m-d H:i:s');
 
-// var_dump($description);
+
+if(!$title){
+
+    $errors[]='Product Title is required';
+}
+
+if(!$price){
+
+  $errors[]='Product Price is required';
+}
+
+if(!is_dir('images')){
+  mkdir('images');
+}
+
+if(empty($errors)){
+ 
+  $image=$_FILES['image'] ?? null;
+  $imgPath='';
+  if($image && $image['tmp_name']){
+
+      $imgPath= 'images/'.randomString(8) .'/'.$image['name'];
+      // echo '<pre>';
+      // var_dump($imgPath);
+      // echo '</pre>';
+      mkdir(dirname($imgPath));
+      move_uploaded_file($image['tmp_name'], $imgPath);
+  }
+
 
 $statement=$pdo->prepare("INSERT INTO products (title, description ,image, price , create_date)
 VALUES(:title, :description, :image, :price, :date)");
 
 $statement->bindValue(':title', $title);
-$statement->bindValue(':image', '');
+$statement->bindValue(':image', $imgPath);
 $statement->bindValue(':description', $description);
 $statement->bindValue(':price', $price);
 $statement->bindValue(':date', $date);
 $statement->execute();
+header('Location:index.php');
 }
-
+}
 // $products=$statement->fetchAll(PDO::FETCH_ASSOC);
 
+function randomString($n){
+  $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  $str='';
+
+  for($i=0; $i<$n; $i++){
+    $index=rand(0,strlen($characters)-1);
+    $str.=$characters[$index];
+  }
+  return $str;
+}
 ?>
 
 <!doctype html>
@@ -52,7 +93,15 @@ $statement->execute();
   </head>
   <body class="container">
     <h1 class="mt-5"> Create Product</h1>
-    <form action="" method="post"> 
+    <form action="" method="post" enctype="multipart/form-data"> 
+
+    <?php if(!empty($errors)):?>
+    <div class="alert alert-danger">
+      <?php foreach ($errors as $error): ?>
+        <div class=""><b>*</b> &nbsp &nbsp<?php echo $error ?></div>
+        <?php endforeach; ?>
+    </div>
+    <?php endif;  ?>
 
         <div class="mb-3">
             <label >Product Image</label>
@@ -64,19 +113,19 @@ $statement->execute();
         <div class="mb-3">
             <label >Product Title</label>
             <br>
-            <input type="text" class="form-control"  name="title">
+            <input type="text" class="form-control"  name="title" autocomplete  value="<?php echo $title ?>" >
         </div>
 
         <div class="mb-3">
             <label >Product Description</label>
             <br>
-            <textarea name="description" id="" cols="30" rows="4"></textarea>
+            <textarea name="description" id="" cols="30" rows="4"><?php echo $description ?></textarea>
         </div>
 
         <div class="mb-3">
             <label >Product Price</label>
             <br>
-            <input type="text" class="form-control"  name="price">
+            <input type="text" class="form-control"  name="price" value="<?php echo $price ?>">
         </div>
 
   <button type="submit" class="btn btn-primary">Submit</button>

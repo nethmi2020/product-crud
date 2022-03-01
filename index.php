@@ -1,5 +1,11 @@
-
+<!-- git init
+git add README.md
+git commit -m "first commit"
+git branch -M master
+git remote add origin https://github.com/nethmi2020/product-crud.git
+git push -u origin master -->
 <?php
+
 
 $pdo =new PDO('mysql:host=localhost;dbname=product_crud', 'root', '');
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -46,7 +52,7 @@ $products=$statement->fetchAll(PDO::FETCH_ASSOC);
   foreach($products as $i=>$p):  ?>
     <tr>
       <th scope="row"><?php echo $i +1 ?></th>
-      <td> </td>
+      <td><img  style="width:113px; height:102px" src="<?php echo  $p['image']  ?>"> </td>
       <td><?php echo $p['title'] ?></td>
       <td><?php echo $p['price'] ?></td>
       <td><?php echo $p['create_date'] ?></td>
