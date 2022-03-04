@@ -93,6 +93,7 @@ function randomString($n){
   </head>
   <body class="container">
     <h1 class="mt-5"> Create Product</h1>
+    <a href="index.php" class="btn btn btn-primary mb-5">Go back to products</a>  
     <form action="" method="post" enctype="multipart/form-data"> 
 
     <?php if(!empty($errors)):?>
